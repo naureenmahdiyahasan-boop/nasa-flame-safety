@@ -6,7 +6,7 @@ st.set_page_config(page_title="Flame in Freefall | AI Fire Safety", layout="wide
 st.title("Flame in Freefall: Microgravity Combustion Insights")
 st.markdown("Translating **NASA Physical Sciences Informatics (PSI)** microgravity combustion data into actionable fire safety for **Spacecraft Habitats** and **Earth Structures**.")
 
-# 1. Load Real NASA PSI CSV Data (Preserves NaN for unreported burn rates)
+# 1. Load Real NASA PSI CSV Data
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/nasa_psi_combustion.csv")
@@ -18,7 +18,7 @@ def load_data():
 
 df = load_data()
 
-# 2. Sidebar: One-Click Mission Presets + Data-Matched Sliders
+# 2. Sidebar: One-Click Mission Presets + Cabin Environment Controls
 st.sidebar.header("Mission & Environment Settings")
 
 preset = st.sidebar.selectbox(
@@ -48,11 +48,10 @@ else:
 
 oxygen_pct = st.sidebar.slider("Oxygen Concentration (%)", min_value=15, max_value=40, value=default_o2)
 pressure_kpa = st.sidebar.slider("Cabin Pressure (kPa)", min_value=50, max_value=105, value=default_kpa)
-max_flame_spread = st.sidebar.slider("Max Safe Flame Spread (mm/s)", min_value=0.1, max_value=2.0, value=1.0, step=0.1)
 
 # 3. Balanced Dynamic Risk Scoring Math & Color-Coded Status
 o2_term = ((oxygen_pct - 15) / 25) * 40
-spread_term = (((df["Flame_Spread_mm_s"] / max_flame_spread).clip(0, 1.5) / 1.5) * 35).fillna(0)
+spread_term = (((df["Flame_Spread_mm_s"] / 3.0).clip(0, 1.5) / 1.5) * 35).fillna(0)
 pressure_term = max(0.0, min(1.0, (105 - pressure_kpa) / 55)) * 15
 baseline_term = (df["Oxygen_Pct"] / 40) * 10
 
@@ -89,7 +88,7 @@ col1, col2 = st.columns([1.35, 1])
 
 with col1:
     st.subheader("Experiment Risk Ranking")
-    st.caption(f"Simulated for **{mode}** at **{oxygen_pct}% O₂**, **{pressure_kpa} kPa**, and **{max_flame_spread} mm/s** spread limit.")
+    st.caption(f"Simulated for **{mode}** at **{oxygen_pct}% O₂** and **{pressure_kpa} kPa**.")
     
     st.bar_chart(ranked_df.set_index("Label")["Simulated_Risk"])
     st.dataframe(
@@ -112,10 +111,16 @@ with col2:
 
     st.info(f"**Selected:** {sel_mat} ({sel_exp}) — **{sel_status}** ({sel_risk}/100)")
 
-    if "Saffire" in sel_exp:
+    if "SAFFIRE" in sel_exp.upper():
         st.caption("**Hardware & Focus:** Large-scale solid material flammability test conducted aboard an uncrewed Cygnus resupply spacecraft.")
-    elif "FLEX" in sel_exp:
-        st.caption("**Hardware & Focus:** Liquid fuel droplet combustion & extinguishment conducted inside the ISS Combustion Integrated Rack (MDCA/CIR).")
+    elif "BASS" in sel_exp.upper():
+        st.caption("**Hardware & Focus:** Solid fuel burning and suppression testing inside the ISS Microgravity Science Glovebox (MSG).")
+    elif "SOFIE" in sel_exp.upper():
+        st.caption("**Hardware & Focus:** Solid fuel ignition and growth testing inside the ISS Combustion Integrated Rack (CIR).")
+    elif "BRE" in sel_exp.upper():
+        st.caption(" **Hardware & Focus:** Condensed-phase solid fuel emulation inside the ISS Combustion Integrated Rack (ACME/CIR).")
+    elif "FLEX" in sel_exp.upper():
+        st.caption("**Hardware & Focus:** Liquid fuel droplet combustion & extinguishment inside the ISS Combustion Integrated Rack (MDCA/CIR).")
 
     user_question = st.text_input("Optional: Ask a custom safety question about this material", placeholder="e.g., How should we suppress this fire in low gravity?")
 
