@@ -52,13 +52,13 @@ oxygen_pct = st.sidebar.slider("Oxygen Concentration (%)", min_value=12, max_val
 pressure_kpa = st.sidebar.slider("Cabin Pressure (kPa)", min_value=50, max_value=310, value=default_kpa)
 airflow_cm_s = st.sidebar.slider("Cabin Ventilation Airflow (cm/s)", min_value=0, max_value=30, value=default_flow)
 
-# 3. Calibrated Dynamic Risk Scoring Math (Oxygen + Burn/Spread Rate + Pressure + Airflow)
-o2_term = ((oxygen_pct - 12) / 28) * 35
-rate_term = ((df["Burn_Or_Spread_Rate"] / 2.0).clip(0, 1.3) / 1.3) * 32
-pressure_term = max(0.0, min(1.0, (110 - pressure_kpa) / 60)) * 18
-airflow_term = (airflow_cm_s / 30) * 10 + (df["Airflow_cm_s"] / 20) * 5
+# 3. Physics-Ordered Risk Scoring Math (40% O2 > 30% Material Rate > 20% Airflow > 10% Pressure)
+o2_term = ((oxygen_pct - 12) / 28) * 40
+rate_term = ((df["Burn_Or_Spread_Rate"] / 2.0).clip(0, 1.3) / 1.3) * 30
+airflow_term = (airflow_cm_s / 30) * 14 + (df["Airflow_cm_s"] / 20) * 6
+pressure_term = max(0.0, min(1.0, (110 - pressure_kpa) / 60)) * 10
 
-raw_risk = o2_term + rate_term + pressure_term + airflow_term
+raw_risk = o2_term + rate_term + airflow_term + pressure_term
 
 if mode == "Spacecraft Habitat (Moon/Mars)":
     df["Simulated_Risk"] = raw_risk.clip(1, 100).round(1)
