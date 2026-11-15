@@ -52,7 +52,7 @@ max_flame_spread = st.sidebar.slider("Max Safe Flame Spread (mm/s)", min_value=0
 # 3. Balanced Dynamic Risk Scoring Math & Color-Coded Status
 o2_term = ((oxygen_pct - 15) / 25) * 40
 spread_term = (((df["Flame_Spread_mm_s"] / max_flame_spread).clip(0, 1.5) / 1.5) * 35).fillna(0)
-pressure_term = ((105 - pressure_kpa) / 55).clip(0, 1) * 15
+pressure_term = max(0.0, min(1.0, (105 - pressure_kpa) / 55)) * 15
 baseline_term = (df["Oxygen_Pct"] / 40) * 10
 
 raw_risk = o2_term + spread_term + pressure_term + baseline_term
