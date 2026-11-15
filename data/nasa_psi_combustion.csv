@@ -2,7 +2,7 @@ Experiment,Material,Oxygen_Pct,Pressure_kPa,Flame_Spread_mm_s
 Saffire I,"75% cotton, 25 % fiberglass",21.6,101,5
 Saffire II,Silicone,22.1,101,1.2
 Saffire II,PMMA,22,101,5
-FLEX,Methanol,21,275.5,5
+FLEX,Methanol,21,103,0.44
 FLEX,Methanol,34,72,0.66
 FLEX,Methanol,20,102,0.41
 FLEX,Methanol,15,102,0.28
