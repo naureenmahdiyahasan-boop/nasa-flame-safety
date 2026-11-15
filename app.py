@@ -6,14 +6,17 @@ st.set_page_config(page_title="Flame in Freefall | AI Fire Safety", layout="wide
 st.title("Flame in Freefall: Microgravity Combustion Insights")
 st.markdown("Translating **NASA Physical Sciences Informatics (PSI)** microgravity combustion data into actionable fire safety for **Spacecraft Habitats** and **Earth Structures**.")
 
-# 1. Load Real NASA PSI CSV Data (5 Columns Only)
+# 1. Load Real NASA PSI CSV Data (Deduplicated so bars never stack)
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/nasa_psi_combustion.csv")
     df.columns = df.columns.str.strip()
+    df["Experiment"] = df["Experiment"].astype(str).str.strip()
+    df["Material"] = df["Material"].astype(str).str.strip()
     for col in ["Oxygen_Pct", "Pressure_kPa", "Flame_Spread_mm_s"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
     df = df.fillna({"Oxygen_Pct": 21.0, "Pressure_kPa": 101.0, "Material": "Unspecified"})
+    df = df.drop_duplicates(subset=["Experiment", "Material", "Oxygen_Pct", "Pressure_kPa"]).reset_index(drop=True)
     df["Label"] = df["Material"] + " (" + df["Experiment"] + " - " + df["Oxygen_Pct"].astype(str) + "% O2)"
     return df
 
