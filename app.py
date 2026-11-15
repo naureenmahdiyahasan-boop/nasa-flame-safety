@@ -10,8 +10,9 @@ st.markdown("Translating **NASA Physical Sciences Informatics (PSI)** microgravi
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/nasa_psi_combustion.csv")
-    df["Flame_Spread_mm_s"] = pd.to_numeric(df["Flame_Spread_mm_s"], errors="coerce")
-    df = df.fillna({"Oxygen_Pct": 21, "Pressure_kPa": 101, "Material": "Unspecified"})
+    for col in ["Oxygen_Pct", "Pressure_kPa", "Flame_Spread_mm_s"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    df = df.fillna({"Oxygen_Pct": 21.0, "Pressure_kPa": 101.0, "Material": "Unspecified"})
     df["Label"] = df["Material"] + " (" + df["Experiment"] + " - " + df["Oxygen_Pct"].astype(str) + "% O2)"
     return df
 
